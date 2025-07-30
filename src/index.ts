@@ -28,6 +28,21 @@ class ExampleMentraOSApp extends AppServer {
     console.log(`🌐 Port: ${PORT}`);
     console.log(`📁 Public Dir: ${path.join(__dirname, '../public')}`);
     console.log(`🤖 OpenAI API: ${OPENAI_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
+    
+    // Log available tools from config
+    try {
+      const configPath = path.join(__dirname, '../app_config.json');
+      const fs = require('fs');
+      if (fs.existsSync(configPath)) {
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        console.log(`🛠️ Available tools: ${config.tools?.length || 0}`);
+        config.tools?.forEach((tool: any) => {
+          console.log(`   - ${tool.id}: ${tool.activationPhrases?.length || 0} phrases`);
+        });
+      }
+    } catch (error) {
+      console.log(`⚠️ Could not read app_config.json:`, error.message);
+    }
 
     // Set up Express routes
     setupExpressRoutes(this);
@@ -42,7 +57,13 @@ class ExampleMentraOSApp extends AppServer {
    * @returns Promise resolving to the tool call response or undefined
    */
   protected async onToolCall(toolCall: ToolCall): Promise<string | undefined> {
-    return handleToolCall(toolCall, toolCall.userId, this.userSessionsMap.get(toolCall.userId));
+    console.log(`🔥 onToolCall triggered! Tool ID: ${toolCall.toolId}`);
+    console.log(`🔥 Tool parameters:`, toolCall.toolParameters);
+    
+    const result = await handleToolCall(toolCall, toolCall.userId, this.userSessionsMap.get(toolCall.userId));
+    console.log(`🔥 Tool call result:`, result);
+    
+    return result;
   }
 
   /**
@@ -73,8 +94,11 @@ class ExampleMentraOSApp extends AppServer {
     // Listen for transcriptions
     session.events.onTranscription((data) => {
       if (data.isFinal) {
+        console.log(`🎙️ Final transcription: "${data.text}"`);
         // Handle final transcription text
         displayTranscription(data.text);
+      } else {
+        console.log(`🎙️ Partial transcription: "${data.text}"`);
       }
     });
 
