@@ -1,7 +1,8 @@
 {
-  "name": "interview",
+  "name": "mentra-ai-assistant",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.ts",
   "scripts": {
     "start": "bun src/index.ts",
     "dev": "bun --hot src/index.ts",
