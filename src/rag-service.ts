@@ -3,6 +3,7 @@
  * Combines personal knowledge base with OpenAI for comprehensive responses
  */
 
+import 'dotenv/config';
 import { retrieveKnowledge, isPersonalQuery, generateRAGResponse, type KnowledgeEntry } from './knowledge-base.js';
 
 // Try to import OpenAI at module level

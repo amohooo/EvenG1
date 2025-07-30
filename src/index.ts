@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { ToolCall, AppServer, AppSession } from '@mentra/sdk';
 import path from 'path';
 import { setupExpressRoutes } from './webview';
@@ -90,11 +91,48 @@ class ExampleMentraOSApp extends AppServer {
     // Show welcome message
     session.layouts.showTextWall("Example App loaded!");
 
+    // Initialize session state for smart display management
+    (session as any)._isDisplayingAIResponse = false;
+    (session as any)._lastActivityTime = Date.now();
+    (session as any)._isSleeping = false;
+    
+    // Set up sleep mode timer (30 seconds of inactivity)
+    const checkSleepMode = () => {
+      const now = Date.now();
+      const timeSinceActivity = now - (session as any)._lastActivityTime;
+      const SLEEP_TIMEOUT = 30000; // 30 seconds
+      
+      if (timeSinceActivity > SLEEP_TIMEOUT && !(session as any)._isSleeping && !(session as any)._isDisplayingAIResponse) {
+        console.log('😴 Entering sleep mode after 30 seconds of inactivity');
+        (session as any)._isSleeping = true;
+        session.layouts.showTextWall("😴 Sleeping... Say 'Hey AI' to wake up");
+      }
+    };
+    
+    // Check sleep mode every 5 seconds
+    const sleepModeInterval = setInterval(checkSleepMode, 5000);
+
     /**
      * Handles transcription display and manual fallback for voice commands
      * @param text - The transcription text to display
      */
     const displayTranscription = (text: string): void => {
+      // Update activity timestamp for any voice input
+      (session as any)._lastActivityTime = Date.now();
+      
+      // Wake up from sleep mode if sleeping
+      if ((session as any)._isSleeping) {
+        console.log('🔄 Waking up from sleep mode');
+        (session as any)._isSleeping = false;
+      }
+      
+      // Don't show transcription overlay if we're currently displaying AI response
+      if ((session as any)._isDisplayingAIResponse) {
+        console.log('🔇 Suppressing transcription display - AI response in progress');
+        console.log(`📝 Suppressed transcript: "${text}"`);
+        return;
+      }
+      
       const showLiveTranscription = session.settings.get<boolean>('show_live_transcription', true);
       if (showLiveTranscription) {
         console.log("📝 Transcript received:", text);
@@ -129,7 +167,12 @@ class ExampleMentraOSApp extends AppServer {
           'tell me about',
           'how do i',
           'can you',
-          'please help'
+          'please help',
+          'wake up',
+          'wake up ai',
+          'are you there',
+          'hello ai',
+          'hi ai'
         ];
         
         // Check if any activation phrase is present
@@ -228,7 +271,14 @@ class ExampleMentraOSApp extends AppServer {
     );
 
     // automatically remove the session when the session ends
-    this.addCleanupHandler(() => this.userSessionsMap.delete(userId));
+    this.addCleanupHandler(() => {
+      // Clear the sleep mode timer
+      if (sleepModeInterval) {
+        clearInterval(sleepModeInterval);
+        console.log('🧹 Cleaned up sleep mode timer for session');
+      }
+      this.userSessionsMap.delete(userId);
+    });
   }
 }
 
