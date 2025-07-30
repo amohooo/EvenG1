@@ -57,13 +57,24 @@ class ExampleMentraOSApp extends AppServer {
    * @returns Promise resolving to the tool call response or undefined
    */
   protected async onToolCall(toolCall: ToolCall): Promise<string | undefined> {
-    console.log(`🔥 onToolCall triggered! Tool ID: ${toolCall.toolId}`);
-    console.log(`🔥 Tool parameters:`, toolCall.toolParameters);
+    console.log(`🔥 AUTOMATIC TOOL CALL: ${toolCall.toolId}`);
+    console.log(`🔥 User ID: ${toolCall.userId}`);
+    console.log(`🔥 Timestamp: ${new Date(toolCall.timestamp).toLocaleTimeString()}`);
+    console.log(`🔥 Parameters:`, toolCall.toolParameters);
     
-    const result = await handleToolCall(toolCall, toolCall.userId, this.userSessionsMap.get(toolCall.userId));
-    console.log(`🔥 Tool call result:`, result);
+    const session = this.userSessionsMap.get(toolCall.userId);
+    if (!session) {
+      console.log(`⚠️ No session found for user ${toolCall.userId}`);
+    }
     
-    return result;
+    try {
+      const result = await handleToolCall(toolCall, toolCall.userId, session);
+      console.log(`✅ AUTOMATIC TOOL CALL COMPLETED: "${result?.substring(0, 50) || 'No response'}..."`);
+      return result;
+    } catch (error) {
+      console.error(`❌ AUTOMATIC TOOL CALL ERROR:`, error);
+      return "Sorry, I encountered an error processing your request.";
+    }
   }
 
   /**
@@ -80,59 +91,96 @@ class ExampleMentraOSApp extends AppServer {
     session.layouts.showTextWall("Example App loaded!");
 
     /**
-     * Handles transcription display based on settings
+     * Handles transcription display and manual fallback for voice commands
      * @param text - The transcription text to display
      */
     const displayTranscription = (text: string): void => {
       const showLiveTranscription = session.settings.get<boolean>('show_live_transcription', true);
       if (showLiveTranscription) {
-        console.log("Transcript received:", text);
+        console.log("📝 Transcript received:", text);
         session.layouts.showTextWall("You said: " + text);
       }
       
-      // TEMPORARY FIX: Manually trigger AI if certain phrases are detected
-      const lowerText = text.toLowerCase().trim();
-      const triggerPhrases = [
-        'can you repeat',
-        'hey ai',
-        'ask ai', 
-        'ai help',
-        'help me',
-        'ai',
-        'help'
-      ];
+      // Log for debugging but let MentraOS handle tool calls automatically first
+      console.log(`👂 Voice input: "${text}"`);
+      console.log(`🔍 Checking if MentraOS will handle this automatically...`);
       
-      const shouldTriggerAI = triggerPhrases.some(phrase => 
-        lowerText.includes(phrase) || lowerText === phrase || lowerText === phrase + ','
-      );
-      
-      if (shouldTriggerAI) {
-        console.log(`🔧 MANUAL TRIGGER: Detected phrase "${text}", triggering AI manually`);
+      // Manual fallback trigger after a short delay (only if MentraOS doesn't handle it)
+      setTimeout(() => {
+        const lowerText = text.toLowerCase().trim();
         
-        // Manually create and handle tool call
-        const manualToolCall = {
-          toolId: 'ask_ai',
-          userId: userId,
-          timestamp: Date.now(),
-          toolParameters: {}
-        };
+        // Define activation phrases that match app_config.json
+        const activationPhrases = [
+          'ask ai',
+          'hey ai',
+          'ai help',
+          'question ai',
+          'can you repeat',
+          'repeat please',
+          'repeat that',
+          'say that again',
+          'i didn\'t understand',
+          'explain that',
+          'what do you mean',
+          'ai',
+          'help me',
+          'help',
+          'what is',
+          'tell me about',
+          'how do i',
+          'can you',
+          'please help'
+        ];
         
-        // Trigger AI response manually
-        setTimeout(async () => {
-          try {
-            const result = await handleToolCall(manualToolCall as any, userId, session);
-            console.log(`🔧 Manual AI response: ${result}`);
-          } catch (error) {
-            console.error('🔧 Manual trigger error:', error);
+        // Check if any activation phrase is present
+        let activationPhrase = activationPhrases.find(phrase => 
+          lowerText.includes(phrase) || lowerText === phrase || lowerText === phrase + ','
+        );
+        
+        if (activationPhrase) {
+          console.log(`🔧 MANUAL FALLBACK: MentraOS didn't handle "${activationPhrase}", triggering manually`);
+          
+          // Extract the question part after the activation phrase
+          let question = text;
+          const phraseIndex = lowerText.indexOf(activationPhrase);
+          if (phraseIndex !== -1) {
+            const afterPhrase = text.substring(phraseIndex + activationPhrase.length).trim();
+            if (afterPhrase && afterPhrase.length > 2) {
+              question = afterPhrase;
+              console.log(`📝 Extracted question: "${question}"`);
+            } else {
+              question = "How can I help you?";
+              console.log(`📝 No specific question found, using default`);
+            }
           }
-        }, 100);
-      }
+          
+          // Create manual tool call
+          const toolCall = {
+            toolId: 'ask_ai',
+            userId: userId,
+            timestamp: Date.now(),
+            toolParameters: { question: question }
+          };
+          
+          // Process manually
+          handleToolCall(toolCall as any, userId, session)
+            .then(result => {
+              console.log(`✅ Manual fallback completed: "${result?.substring(0, 50) || 'No response'}..."`);
+            })
+            .catch(error => {
+              console.error('❌ Manual fallback error:', error);
+            });
+        } else {
+          console.log(`✅ Voice input processed (no activation phrase or handled by MentraOS)`);
+        }
+      }, 1000); // Give MentraOS 1 second to handle automatically
     };
 
     // Listen for transcriptions
     session.events.onTranscription((data) => {
       if (data.isFinal) {
         console.log(`🎙️ Final transcription: "${data.text}"`);
+        console.log(`🔍 Processing for voice commands...`);
         // Handle final transcription text
         displayTranscription(data.text);
       } else {

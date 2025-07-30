@@ -27,6 +27,7 @@
         "AI help,",
         "question AI",
         "can you repeat",
+        "Can you repeat?",
         "can you repeat,",
         "repeat please",
         "repeat that",
@@ -37,7 +38,12 @@
         "AI",
         "AI,",
         "help me",
-        "help"
+        "help",
+        "what is",
+        "tell me about",
+        "how do I",
+        "can you",
+        "please help"
       ],
       "parameters": {
         "question": {
