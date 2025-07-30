@@ -5,23 +5,23 @@
 ### 1. AI问答功能
 **语音激活词：**
 - "ask AI"
-- "question for AI" 
-- "AI help me"
 - "hey AI"
+- "AI help"
+- "question AI"
 
 **使用方法：**
 说出激活词 + 你的问题，例如：
 - "Ask AI what's the weather like today?"
 - "Hey AI, how do I cook pasta?"
-- "AI help me with JavaScript syntax"
+- "AI help with JavaScript syntax"
 
 ### 2. 重复功能
 **语音激活词：**
-- "sorry can you repeat"
-- "can you repeat that"
+- "can you repeat"
 - "repeat please"
-- "I didn't understand"
+- "repeat that"
 - "say that again"
+- "I didn't understand"
 
 **使用方法：**
 当你没听清AI的回答时，说出激活词即可重复上一次的回答。

@@ -16,31 +16,14 @@
   ],
   "tools": [
     {
-      "id": "repeat_question",
-      "description": "Ask AI to repeat or clarify something when user didn't understand",
-      "activationPhrases": [
-        "sorry can you repeat",
-        "can you repeat that",
-        "repeat please",
-        "I didn't understand",
-        "say that again"
-      ],
-      "parameters": {
-        "question": {
-          "type": "string",
-          "description": "The question or topic to clarify",
-          "required": false
-        }
-      }
-    },
-    {
       "id": "ask_ai",
       "description": "Ask OpenAI a question and get an answer",
       "activationPhrases": [
-        "ask AI",
-        "question for AI",
-        "AI help me",
-        "hey AI"
+        "can you repeat",
+        "repeat please",
+        "repeat that",
+        "say that again",
+        "I didn't understand"
       ],
       "parameters": {
         "question": {

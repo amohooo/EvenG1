@@ -8,6 +8,7 @@
     "dev": "bun --hot src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test-ai": "bun src/test-ai.ts",
+    "test-voice": "bun src/test-voice-commands.ts",
     "env-check": "bun src/env-check.ts",
     "build": "bun install",
     "deploy": "echo 'Deploy to Railway: git push origin main'"
