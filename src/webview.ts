@@ -15,17 +15,46 @@ export function setupExpressRoutes(server: AppServer): void {
   app.engine('ejs', require('ejs').__express);
   app.set('views', path.join(__dirname, 'views'));
 
+  // Add a root route for debugging
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'MentraOS App Server is running!',
+      endpoints: ['/webview', '/health'],
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Add health check route
+  app.get('/health', (req, res) => {
+    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  });
+
   // Register a route for handling webview requests
   app.get('/webview', (req: AuthenticatedRequest, res) => {
-    if (req.authUserId) {
-      // Render the webview template
-      res.render('webview', {
-        userId: req.authUserId,
-      });
-    } else {
-      res.render('webview', {
-        userId: undefined,
-      });
+    try {
+      if (req.authUserId) {
+        // Render the webview template
+        res.render('webview', {
+          userId: req.authUserId,
+        });
+      } else {
+        res.render('webview', {
+          userId: undefined,
+        });
+      }
+    } catch (error) {
+      console.error('Error rendering webview:', error);
+      res.status(500).json({ error: 'Internal server error', details: error.message });
     }
+  });
+
+  // Add 404 handler
+  app.use((req, res) => {
+    res.status(404).json({ 
+      error: 'Resource not found',
+      path: req.path,
+      method: req.method,
+      availableRoutes: ['/', '/webview', '/health']
+    });
   });
 }

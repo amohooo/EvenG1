@@ -2,9 +2,16 @@ import { ToolCall, AppServer, AppSession } from '@mentra/sdk';
 import path from 'path';
 import { setupExpressRoutes } from './webview';
 import { handleToolCall } from './tools';
+import { validateEnvironment } from './env-check';
 
+// Validate environment before starting
+console.log('🔧 Environment Check:');
+validateEnvironment();
+
+// Load environment variables
 const PACKAGE_NAME = process.env.PACKAGE_NAME ?? (() => { throw new Error('PACKAGE_NAME is not set in .env file'); })();
 const MENTRAOS_API_KEY = process.env.MENTRAOS_API_KEY ?? (() => { throw new Error('MENTRAOS_API_KEY is not set in .env file'); })();
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const PORT = parseInt(process.env.PORT || '3000');
 
 class ExampleMentraOSApp extends AppServer {
@@ -15,6 +22,12 @@ class ExampleMentraOSApp extends AppServer {
       port: PORT,
       publicDir: path.join(__dirname, '../public'),
     });
+
+    console.log(`🚀 Initializing MentraOS App Server`);
+    console.log(`📦 Package: ${PACKAGE_NAME}`);
+    console.log(`🌐 Port: ${PORT}`);
+    console.log(`📁 Public Dir: ${path.join(__dirname, '../public')}`);
+    console.log(`🤖 OpenAI API: ${OPENAI_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
 
     // Set up Express routes
     setupExpressRoutes(this);
@@ -86,4 +99,16 @@ class ExampleMentraOSApp extends AppServer {
 // Start the server
 const app = new ExampleMentraOSApp();
 
-app.start().catch(console.error);
+console.log('🔄 Starting MentraOS App Server...');
+
+app.start()
+  .then(() => {
+    console.log(`✅ Server started successfully on port ${PORT}`);
+    console.log(`🌐 Local access: http://localhost:${PORT}`);
+    console.log(`🔍 Health check: http://localhost:${PORT}/health`);
+    console.log(`👁️ Webview: http://localhost:${PORT}/webview`);
+  })
+  .catch((error) => {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  });
