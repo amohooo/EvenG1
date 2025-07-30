@@ -2,29 +2,26 @@
 
 ## 🎯 新增功能
 
-### 1. AI问答功能
+### AI智能助手
 **语音激活词：**
-- "ask AI"
-- "hey AI"
-- "AI help"
-- "question AI"
+- "ask AI" - 问AI问题
+- "hey AI" - 呼叫AI助手
+- "AI help" - 请求AI帮助
+- "question AI" - 向AI提问
+- "can you repeat" - 请AI回答/解释
+- "repeat please" - 请重新说明
+- "repeat that" - 再说一遍
+- "say that again" - 再解释一次
+- "I didn't understand" - 没听懂，需要解释
+- "explain that" - 请解释
+- "what do you mean" - 什么意思
 
 **使用方法：**
-说出激活词 + 你的问题，例如：
+说出任何激活词，AI会自动为你提供帮助或回答问题，例如：
 - "Ask AI what's the weather like today?"
 - "Hey AI, how do I cook pasta?"
-- "AI help with JavaScript syntax"
-
-### 2. 重复功能
-**语音激活词：**
-- "can you repeat"
-- "repeat please"
-- "repeat that"
-- "say that again"
-- "I didn't understand"
-
-**使用方法：**
-当你没听清AI的回答时，说出激活词即可重复上一次的回答。
+- "Can you repeat" - 当你需要AI帮助时
+- "I didn't understand" - 当你需要解释时
 
 ## 🔧 配置说明
 
@@ -74,10 +71,15 @@ bun run dev
 ```
 用户: "Ask AI what is machine learning?"
 眼镜显示: "🤖 Thinking..."
-眼镜显示: "🤖 AI: Machine learning is a type of artificial intelligence that enables computers to learn and make decisions from data without being explicitly programmed for every task."
+眼镜显示: "🤖 Machine learning is a type of artificial intelligence that enables computers to learn and make decisions from data without being explicitly programmed for every task."
 
-用户: "Sorry can you repeat?"
-眼镜显示: "🔄 Repeating: Machine learning is a type of artificial intelligence that enables computers to learn and make decisions from data without being explicitly programmed for every task."
+用户: "Can you repeat?"
+眼镜显示: "🤖 Thinking..."
+眼镜显示: "🤖 How can I help you? Please let me know what you need assistance with."
+
+用户: "Hey AI, explain quantum computing"
+眼镜显示: "🤖 Thinking..."
+眼镜显示: "🤖 Quantum computing uses quantum mechanics principles to process information in ways that traditional computers cannot, potentially solving certain problems much faster."
 ```
 
 ## 🎨 自定义配置

@@ -17,19 +17,25 @@
   "tools": [
     {
       "id": "ask_ai",
-      "description": "Ask OpenAI a question and get an answer",
+      "description": "Ask OpenAI a question and get an answer when user needs help or clarification",
       "activationPhrases": [
+        "ask AI",
+        "hey AI", 
+        "AI help",
+        "question AI",
         "can you repeat",
         "repeat please",
         "repeat that",
         "say that again",
-        "I didn't understand"
+        "I didn't understand",
+        "explain that",
+        "what do you mean"
       ],
       "parameters": {
         "question": {
           "type": "string",
           "description": "The question to ask AI",
-          "required": true
+          "required": false
         }
       }
     }

@@ -1,5 +1,5 @@
 import { ToolCall, AppSession } from '@mentra/sdk';
-import { askAI, getLastAiResponse } from './ai-service';
+import { askAI } from './ai-service';
 
 /**
  * Handle a tool call
@@ -20,41 +20,14 @@ export async function handleToolCall(toolCall: ToolCall, userId: string, session
   }
 
   try {
-    if (toolCall.toolId === "repeat_question") {
-      console.log("🔄 Processing repeat request...");
-      const lastResponse = getLastAiResponse();
-      
-      if (lastResponse) {
-        console.log("✅ Found previous response to repeat");
-        // Display the last AI response again
-        if (session) {
-          session.layouts.showTextWall(`🔄 Repeating: ${lastResponse}`);
-        }
-        return `I said: ${lastResponse}`;
-      } else {
-        console.log("⚠️ No previous response found");
-        const response = "I haven't said anything yet. Please ask me a question first.";
-        if (session) {
-          session.layouts.showTextWall(`ℹ️ ${response}`);
-        }
-        return response;
-      }
-    }
-
     if (toolCall.toolId === "ask_ai") {
-      console.log("🤖 Processing AI question request...");
+      console.log("🤖 Processing AI request...");
       const question = toolCall.toolParameters?.question as string;
       
-      if (!question) {
-        console.log("⚠️ No question provided in parameters");
-        const response = "Please provide a question to ask AI.";
-        if (session) {
-          session.layouts.showTextWall(`⚠️ ${response}`);
-        }
-        return response;
-      }
-
-      console.log(`📝 Question received: "${question}"`);
+      // If no specific question is provided, generate a helpful response
+      const finalQuestion = question || "How can I help you? Please let me know what you need assistance with.";
+      
+      console.log(`📝 Question to process: "${finalQuestion}"`);
       
       // Show loading message
       if (session) {
@@ -62,12 +35,12 @@ export async function handleToolCall(toolCall: ToolCall, userId: string, session
       }
 
       // Get AI response
-      const aiResponse = await askAI(question);
+      const aiResponse = await askAI(finalQuestion);
       console.log(`✅ AI response generated: "${aiResponse.substring(0, 50)}..."`);
       
       // Display the response on the glasses
       if (session) {
-        session.layouts.showTextWall(`🤖 AI: ${aiResponse}`);
+        session.layouts.showTextWall(`🤖 ${aiResponse}`);
       }
       
       return aiResponse;
@@ -75,6 +48,7 @@ export async function handleToolCall(toolCall: ToolCall, userId: string, session
 
     // Handle unknown tools
     const response = `Unknown tool: ${toolCall.toolId}`;
+    console.log(`❓ ${response}`);
     if (session) {
       session.layouts.showTextWall(`❓ ${response}`);
     }
