@@ -89,6 +89,44 @@ class ExampleMentraOSApp extends AppServer {
         console.log("Transcript received:", text);
         session.layouts.showTextWall("You said: " + text);
       }
+      
+      // TEMPORARY FIX: Manually trigger AI if certain phrases are detected
+      const lowerText = text.toLowerCase().trim();
+      const triggerPhrases = [
+        'can you repeat',
+        'hey ai',
+        'ask ai', 
+        'ai help',
+        'help me',
+        'ai',
+        'help'
+      ];
+      
+      const shouldTriggerAI = triggerPhrases.some(phrase => 
+        lowerText.includes(phrase) || lowerText === phrase || lowerText === phrase + ','
+      );
+      
+      if (shouldTriggerAI) {
+        console.log(`🔧 MANUAL TRIGGER: Detected phrase "${text}", triggering AI manually`);
+        
+        // Manually create and handle tool call
+        const manualToolCall = {
+          toolId: 'ask_ai',
+          userId: userId,
+          timestamp: Date.now(),
+          toolParameters: {}
+        };
+        
+        // Trigger AI response manually
+        setTimeout(async () => {
+          try {
+            const result = await handleToolCall(manualToolCall as any, userId, session);
+            console.log(`🔧 Manual AI response: ${result}`);
+          } catch (error) {
+            console.error('🔧 Manual trigger error:', error);
+          }
+        }, 100);
+      }
     };
 
     // Listen for transcriptions

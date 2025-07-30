@@ -20,16 +20,24 @@
       "description": "Ask OpenAI a question and get an answer when user needs help or clarification",
       "activationPhrases": [
         "ask AI",
+        "ask AI,",
         "hey AI", 
+        "hey AI,",
         "AI help",
+        "AI help,",
         "question AI",
         "can you repeat",
+        "can you repeat,",
         "repeat please",
         "repeat that",
         "say that again",
         "I didn't understand",
         "explain that",
-        "what do you mean"
+        "what do you mean",
+        "AI",
+        "AI,",
+        "help me",
+        "help"
       ],
       "parameters": {
         "question": {

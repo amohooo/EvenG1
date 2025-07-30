@@ -10,6 +10,7 @@
     "test-ai": "bun src/test-ai.ts",
     "test-voice": "bun src/test-voice-commands.ts",
     "test-tools": "bun src/debug-tools.ts",
+    "test-manual": "bun src/manual-test.ts",
     "env-check": "bun src/env-check.ts",
     "build": "bun install",
     "deploy": "echo 'Deploy to Railway: git push origin main'"

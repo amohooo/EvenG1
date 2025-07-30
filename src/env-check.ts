@@ -51,4 +51,7 @@ if (process.env.RAILWAY_ENVIRONMENT) {
   console.log('💻 Running in local environment');
 }
 
+// Run validation
+validateEnvironment();
+
 export { validateEnvironment };

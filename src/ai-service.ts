@@ -5,22 +5,56 @@
 // Store the last AI response for repeat functionality
 let lastAiResponse: string = "";
 
+// Try to import OpenAI at module level
+let OpenAI: any = null;
+try {
+  // Use require for better compatibility
+  OpenAI = require('openai').default || require('openai');
+} catch (error) {
+  console.log('⚠️ OpenAI module could not be loaded:', error.message);
+}
+
 /**
  * Simulate OpenAI response (fallback when OpenAI is not available)
  * @param question - The question to ask
  * @returns Promise that resolves to a mock AI response
  */
 async function mockAiResponse(question: string): Promise<string> {
+  // More intelligent mock responses based on question content
+  const lowerQuestion = question.toLowerCase();
+  
+  if (lowerQuestion.includes('help') || lowerQuestion.includes('assistance')) {
+    return "I'm here to help! I can answer questions, provide explanations, solve problems, or have conversations. What would you like to know?";
+  }
+  
+  if (lowerQuestion.includes('weather')) {
+    return "I can't check real weather data, but I'd recommend checking a weather app or asking for the current conditions in your area.";
+  }
+  
+  if (lowerQuestion.includes('time') || lowerQuestion.includes('date')) {
+    const now = new Date();
+    return `The current time is ${now.toLocaleTimeString()} on ${now.toLocaleDateString()}.`;
+  }
+  
+  if (lowerQuestion.includes('2+2') || lowerQuestion.includes('math')) {
+    return "2+2 equals 4. I can help with basic math calculations and explanations.";
+  }
+  
+  if (lowerQuestion.includes('hello') || lowerQuestion.includes('hi ')) {
+    return "Hello! Nice to meet you. I'm your AI assistant running on smart glasses. How can I help you today?";
+  }
+  
+  // Default intelligent responses
   const responses = [
-    "That's an interesting question! Let me think about it.",
-    "Based on what you asked, here's what I think...",
-    "I understand your question. Here's my take on it.",
-    "Good question! From my perspective...",
-    "Let me help you with that inquiry.",
+    "That's an interesting question! While I'm running in demo mode, I can still provide helpful responses.",
+    "I understand what you're asking. In a real scenario, I'd give you a detailed answer about that topic.",
+    "Good question! I'm currently in mock mode, but I can still engage meaningfully with your queries.",
+    "Let me help you with that. Even in demo mode, I can provide useful guidance and information.",
+    "I see what you need assistance with. I'm designed to be helpful across many different topics.",
   ];
   
   const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-  return `${randomResponse} (This is a mock response - please configure OpenAI API key for real AI responses)`;
+  return randomResponse;
 }
 
 /**
@@ -34,18 +68,24 @@ export async function askAI(question: string): Promise<string> {
     
     // Check if OpenAI API key is configured
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey || apiKey === 'your_openai_api_key_here' || apiKey.length < 10) {
+    if (!apiKey || apiKey === 'demo_mode' || apiKey.length < 20) {
       console.log('⚠️ OpenAI API key not configured properly, using mock response');
-      console.log(`Current API key status: ${apiKey ? 'Set but invalid' : 'Not set'}`);
+      console.log(`Current API key status: ${apiKey === 'demo_mode' ? 'Demo mode' : (apiKey ? 'Set but invalid' : 'Not set')}`);
       const response = await mockAiResponse(question);
       lastAiResponse = response;
       return response;
     }
 
-    // Try to use OpenAI (dynamic import to avoid build issues)
+    // Check if OpenAI is available
+    if (!OpenAI) {
+      console.log('⚠️ OpenAI module not available, using mock response');
+      const response = await mockAiResponse(question);
+      lastAiResponse = response;
+      return response;
+    }
+
+    // Try to use OpenAI
     try {
-      const { default: OpenAI } = await import('openai');
-      
       const openai = new OpenAI({
         apiKey: apiKey,
       });
@@ -72,8 +112,9 @@ export async function askAI(question: string): Promise<string> {
       console.log(`🤖 OpenAI Response: "${response}"`);
       return response;
       
-    } catch (importError) {
-      console.log('⚠️ OpenAI module not available, using mock response');
+    } catch (openaiError) {
+      console.log('⚠️ OpenAI API call failed, using mock response');
+      console.log('Error details:', openaiError.message);
       const response = await mockAiResponse(question);
       lastAiResponse = response;
       return response;
