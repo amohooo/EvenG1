@@ -65,6 +65,8 @@ async function mockAiResponse(question: string): Promise<string> {
 export async function askAI(question: string): Promise<string> {
   try {
     console.log(`🤖 Asking AI: "${question}"`);
+    console.log(`📏 Question length: ${question.length} characters`);
+    console.log(`📝 Question type: ${typeof question}`);
     
     // Check if OpenAI API key is configured
     const apiKey = process.env.OPENAI_API_KEY;

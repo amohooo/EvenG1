@@ -139,18 +139,44 @@ class ExampleMentraOSApp extends AppServer {
         
         if (activationPhrase) {
           console.log(`🔧 MANUAL FALLBACK: MentraOS didn't handle "${activationPhrase}", triggering manually`);
+          console.log(`🎙️ Original text: "${text}"`);
+          console.log(`🔤 Lowercase text: "${lowerText}"`);
+          console.log(`🎯 Found activation phrase: "${activationPhrase}"`);
           
           // Extract the question part after the activation phrase
           let question = text;
           const phraseIndex = lowerText.indexOf(activationPhrase);
+          console.log(`📍 Phrase index: ${phraseIndex}`);
+          
           if (phraseIndex !== -1) {
             const afterPhrase = text.substring(phraseIndex + activationPhrase.length).trim();
+            console.log(`✂️ Text after phrase: "${afterPhrase}"`);
+            console.log(`📏 After phrase length: ${afterPhrase.length}`);
+            
             if (afterPhrase && afterPhrase.length > 2) {
               question = afterPhrase;
               console.log(`📝 Extracted question: "${question}"`);
             } else {
-              question = "How can I help you?";
-              console.log(`📝 No specific question found, using default`);
+              // Handle cases where the activation phrase IS the complete command
+              if (activationPhrase === 'can you repeat' || activationPhrase === 'repeat please' || activationPhrase === 'repeat that') {
+                question = "Please repeat your last response";
+                console.log(`🔄 Repeat command detected, using: "${question}"`);
+              } else if (lowerText.includes('help') || activationPhrase === 'help me' || activationPhrase === 'help') {
+                question = "What can you help me with?";
+                console.log(`❓ Help command detected, using: "${question}"`);
+              } else if (activationPhrase === 'ai' && afterPhrase.length <= 2) {
+                question = "Hello, how can I assist you today?";
+                console.log(`👋 Simple AI greeting detected, using: "${question}"`);
+              } else {
+                // Use the full original text as the question if it makes sense
+                if (text.includes('?') || text.includes('what') || text.includes('how') || text.includes('when') || text.includes('where') || text.includes('why')) {
+                  question = text;
+                  console.log(`❓ Using full text as question: "${question}"`);
+                } else {
+                  question = "How can I help you?";
+                  console.log(`📝 Using default question`);
+                }
+              }
             }
           }
           

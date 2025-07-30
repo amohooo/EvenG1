@@ -24,10 +24,16 @@ export async function handleToolCall(toolCall: ToolCall, userId: string, session
       console.log("🤖 Processing AI request...");
       const question = toolCall.toolParameters?.question as string;
       
+      console.log(`🔍 Raw question parameter: "${question}"`);
+      console.log(`🔍 Question type: ${typeof question}`);
+      console.log(`🔍 Question is undefined: ${question === undefined}`);
+      console.log(`🔍 Question is empty: ${question === ""}`);
+      
       // If no specific question is provided, generate a helpful response
       const finalQuestion = question || "How can I help you? Please let me know what you need assistance with.";
       
-      console.log(`📝 Question to process: "${finalQuestion}"`);
+      console.log(`📝 Final question to process: "${finalQuestion}"`);
+      console.log(`⚠️ Using default question: ${finalQuestion === "How can I help you? Please let me know what you need assistance with."}`);
       
       // Show loading message
       if (session) {
