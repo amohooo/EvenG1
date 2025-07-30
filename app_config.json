@@ -43,7 +43,15 @@
         "tell me about",
         "how do I",
         "can you",
-        "please help"
+        "please help",
+        "show me code",
+        "show code",
+        "give me code",
+        "code example",
+        "implement",
+        "write code",
+        "how to code",
+        "programming example"
       ],
       "parameters": {
         "question": {

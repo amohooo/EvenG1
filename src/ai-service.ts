@@ -1,6 +1,8 @@
 /**
- * AI Service for handling OpenAI API calls
+ * AI Service for handling OpenAI API calls with RAG capabilities
  */
+
+import { askAIWithRAG } from './rag-service.js';
 
 // Store the last AI response for repeat functionality
 let lastAiResponse: string = "";
@@ -58,87 +60,19 @@ async function mockAiResponse(question: string): Promise<string> {
 }
 
 /**
- * Ask AI a question and return the response
+ * Ask AI a question and return the response (now with RAG capabilities)
  * @param question - The question to ask
  * @returns Promise that resolves to the AI response
  */
 export async function askAI(question: string): Promise<string> {
   try {
-    console.log(`🤖 Asking AI: "${question}"`);
+    console.log(`🤖 Asking AI with RAG: "${question}"`);
     console.log(`📏 Question length: ${question.length} characters`);
-    console.log(`📝 Question type: ${typeof question}`);
     
-    // Check if OpenAI API key is configured
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey || apiKey === 'demo_mode' || apiKey.length < 20) {
-      console.log('⚠️ OpenAI API key not configured properly, using mock response');
-      console.log(`Current API key status: ${apiKey === 'demo_mode' ? 'Demo mode' : (apiKey ? 'Set but invalid' : 'Not set')}`);
-      const response = await mockAiResponse(question);
-      lastAiResponse = response;
-      return response;
-    }
-
-    // Check if OpenAI is available
-    if (!OpenAI) {
-      console.log('⚠️ OpenAI module not available, using mock response');
-      const response = await mockAiResponse(question);
-      lastAiResponse = response;
-      return response;
-    }
-
-    // Try to use OpenAI
-    try {
-      const openai = new OpenAI({
-        apiKey: apiKey,
-      });
-
-      console.log('✅ Using real OpenAI API');
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `You are a helpful AI assistant for smart glasses. CRITICAL: Keep responses extremely concise for glasses display.
-
-RESPONSE RULES:
-- Maximum 2-3 sentences
-- NO code blocks or long examples
-- For coding questions: Explain concepts briefly, don't show full code
-- For algorithms: Describe the logic in 1-2 sentences
-- Use simple, clear language
-- If user needs code, suggest they check their computer/phone
-
-PERSONAL CONTEXT:
-- You are assisting a developer working on MentraOS smart glasses
-- Be helpful with programming, AI, and technology questions
-- Keep everything SHORT and suitable for small screen display
-
-Example responses:
-- "Bubble sort compares adjacent elements and swaps them if they're in wrong order. It repeats until the array is sorted."
-- "Python is great for beginners because of its simple syntax and readable code."
-- "Machine learning uses algorithms to find patterns in data and make predictions."`
-          },
-          {
-            role: "user",
-            content: question
-          }
-        ],
-        max_tokens: 150,
-        temperature: 0.7,
-      });
-
-      const response = completion.choices[0]?.message?.content?.trim() || "Sorry, I couldn't generate a response.";
-      lastAiResponse = response;
-      console.log(`🤖 OpenAI Response: "${response}"`);
-      return response;
-      
-    } catch (openaiError) {
-      console.log('⚠️ OpenAI API call failed, using mock response');
-      console.log('Error details:', openaiError.message);
-      const response = await mockAiResponse(question);
-      lastAiResponse = response;
-      return response;
-    }
+    // Use the new RAG-enabled service
+    const response = await askAIWithRAG(question);
+    lastAiResponse = response;
+    return response;
     
   } catch (error) {
     console.error('❌ AI API Error:', error);
